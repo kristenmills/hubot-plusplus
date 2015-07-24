@@ -41,7 +41,7 @@ module.exports = (robot) ->
     # optional reason for the plusplus
     (?:\s+(?:for|because|cause|cuz)\s+(.+))?
     $ # end of line
-  ///i,  id: 'plusplus.++', (msg) ->
+  ///i,  id: 'plusplus.vote', (msg) ->
     # let's get our local vars in place
     [dummy, name, operator, reason] = msg.match
     from = msg.message.user.name.toLowerCase()
