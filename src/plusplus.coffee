@@ -56,34 +56,38 @@ module.exports = (robot) ->
       [name, lastReason] = scoreKeeper.last(room)
       reason = lastReason if !reason? && lastReason?
 
-    # do the {up, down}vote, and figure out what the new score is
-    [score, reasonScore] = if operator == "++"
-              scoreKeeper.add(name, from, room, reason)
-            else
-              scoreKeeper.subtract(name, from, room, reason)
+    user = robot.brain.userForName(name)
+    if user?
+      # do the {up, down}vote, and figure out what the new score is
+      [score, reasonScore] = if operator == "++"
+                scoreKeeper.add(user.id, from, room, reason)
+              else
+                scoreKeeper.subtract(user.id, from, room, reason)
 
-    # if we got a score, then display all the things and fire off events!
-    if score?
-      message = if reason?
-                  if reasonScore == 1 or reasonScore == -1
-                    "#{name} has #{score} points, #{reasonScore} of which is for #{reason}."
+      # if we got a score, then display all the things and fire off events!
+      if score?
+        message = if reason?
+                    if reasonScore == 1 or reasonScore == -1
+                      "#{user.name} has #{score} points, #{reasonScore} of which is for #{reason}."
+                    else
+                      "#{user.name} has #{score} points, #{reasonScore} of which are for #{reason}."
                   else
-                    "#{name} has #{score} points, #{reasonScore} of which are for #{reason}."
-                else
-                  if score == 1
-                    "#{name} has #{score} point"
-                  else
-                    "#{name} has #{score} points"
+                    if score == 1
+                      "#{user.name} has #{score} point."
+                    else
+                      "#{user.name} has #{score} points."
 
 
-      msg.send message
+        msg.send message
 
-      robot.emit "plus-one", {
-        name: name
-        direction: operator
-        room: room
-        reason: reason
-      }
+        robot.emit "plus-one", {
+          name: name
+          direction: operator
+          room: room
+          reason: reason
+        }
+    else
+      msg.send "I don't know who #{name} is."
 
   robot.respond ///
     (?:erase )
