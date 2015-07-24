@@ -41,7 +41,7 @@ module.exports = (robot) ->
     # optional reason for the plusplus
     (?:\s+(?:for|because|cause|cuz)\s+(.+))?
     $ # end of line
-  ///i, (msg) ->
+  ///i,  id: 'plusplus.++', (msg) ->
     # let's get our local vars in place
     [dummy, name, operator, reason] = msg.match
     from = msg.message.user.name.toLowerCase()
@@ -74,7 +74,7 @@ module.exports = (robot) ->
                     "#{name} has #{score} point"
                   else
                     "#{name} has #{score} points"
-                  
+
 
       msg.send message
 
@@ -92,7 +92,7 @@ module.exports = (robot) ->
     # optionally erase a reason from thing
     (?:\s+(?:for|because|cause|cuz)\s+(.+))?
     $ # eol
-  ///i, (msg) ->
+  ///i, id: 'plusplus.erase', (msg) ->
     [__, name, reason] = msg.match
     from = msg.message.user.name.toLowerCase()
     user = msg.envelope.user
@@ -114,7 +114,7 @@ module.exports = (robot) ->
                   "Erased points for #{name}"
       msg.send message
 
-  robot.respond /score (for\s)?(.*)/i, (msg) ->
+  robot.respond /score (for\s)?(.*)/i, id: 'plusplus.score', (msg) ->
     name = msg.match[2].trim().toLowerCase()
     score = scoreKeeper.scoreForUser(name)
     reasons = scoreKeeper.reasonsForUser(name)
@@ -129,7 +129,7 @@ module.exports = (robot) ->
 
     msg.send reasonString
 
-  robot.respond /(top|bottom) (\d+)/i, (msg) ->
+  robot.respond /(top|bottom) (\d+)/i, id: 'plusplus.top-bottom', (msg) ->
     amount = parseInt(msg.match[2]) || 10
     message = []
 
