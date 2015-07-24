@@ -103,11 +103,12 @@ module.exports = (robot) ->
     room = msg.message.room
     reason = reason?.trim().toLowerCase()
     name = (name.replace /(^\s*@)|([,:\s]*$)/g, "").trim().toLowerCase() if name
+    userId = robot.brain.userForName?(name).id;
 
-    isAdmin = @robot.auth?.hasRole(user, 'plusplus-admin') or @robot.auth?.hasRole(user, 'admin')
+    isAdmin = robot.auth?.hasRole(user, 'plusplus-admin') or robot.auth?.hasRole(user, 'admin')
 
-    if not @robot.auth? or isAdmin
-      erased = scoreKeeper.erase(name, from, room, reason)
+    if not robot.auth? or isAdmin
+      erased = scoreKeeper.erase(id, from, room, reason)
     else
       return msg.reply "Sorry, you don't have authorization to do that."
 
@@ -120,8 +121,9 @@ module.exports = (robot) ->
 
   robot.respond /score (for\s)?(.*)/i, id: 'plusplus.score', (msg) ->
     name = msg.match[2].trim().toLowerCase()
-    score = scoreKeeper.scoreForUser(name)
-    reasons = scoreKeeper.reasonsForUser(name)
+    userId = robot.brain.userForName?(name).id;
+    score = scoreKeeper.scoreForUser(userId)
+    reasons = scoreKeeper.reasonsForUser(userId)
 
     reasonString = if typeof reasons == 'object' && Object.keys(reasons).length > 0
                      "#{name} has #{score} points. here are some raisins:" +
@@ -141,7 +143,7 @@ module.exports = (robot) ->
 
     if tops.length > 0
       for i in [0..tops.length-1]
-        message.push("#{i+1}. #{tops[i].name} : #{tops[i].score}")
+        message.push("#{i+1}. #{robot.brain.userForId(tops[i].name).name} : #{tops[i].score}")
     else
       message.push("No scores to keep track of yet!")
 
