@@ -28,6 +28,26 @@ ScoreKeeper = require('./scorekeeper')
 module.exports = (robot) ->
   scoreKeeper = new ScoreKeeper(robot)
 
+  listenerMetadata =
+    vote:
+      id: 'plusplus.vote'
+      help: [
+        '<user++ - add points to a user'
+        '<user>-- - remove points from a user'
+      ]
+    erase:
+      id: 'plusplus.erase'
+      help: 'hubot erase <user> - erase all points for a user'
+    score:
+      id: 'plusplus.score'
+      help: 'hubot score <user> - gets the score fore a specific user'
+    topBottom:
+      id: 'plusplus.top-bottom'
+      help: [
+        'hubot top <n> - gets the top `n` users and their scores'
+        'hubot bottom <n> - gets the bottom `n` users and their scores'
+      ]
+
   # sweet regex bro
   robot.hear ///
     # from beginning of line
@@ -41,7 +61,7 @@ module.exports = (robot) ->
     # optional reason for the plusplus
     (?:\s+(?:for|because|cause|cuz)\s+(.+))?
     $ # end of line
-  ///i,  id: 'plusplus.vote', (msg) ->
+  ///i,  listenerMetadata.vote, (msg) ->
     # let's get our local vars in place
     [dummy, name, operator, reason] = msg.match
     from = msg.message.user.name.toLowerCase()
@@ -96,7 +116,7 @@ module.exports = (robot) ->
     # optionally erase a reason from thing
     (?:\s+(?:for|because|cause|cuz)\s+(.+))?
     $ # eol
-  ///i, id: 'plusplus.erase', (msg) ->
+  ///i, listenerMetadata.erase, (msg) ->
     [__, name, reason] = msg.match
     from = msg.message.user.name.toLowerCase()
     user = msg.envelope.user
@@ -119,7 +139,7 @@ module.exports = (robot) ->
                   "Erased points for #{name}"
       msg.send message
 
-  robot.respond /score (for\s)?(.*)/i, id: 'plusplus.score', (msg) ->
+  robot.respond /score (for\s)?(.*)/i, listenerMetadata.score, (msg) ->
     name = msg.match[2].trim().toLowerCase()
     userId = robot.brain.userForName?(name).id;
     score = scoreKeeper.scoreForUser(userId)
@@ -135,7 +155,7 @@ module.exports = (robot) ->
 
     msg.send reasonString
 
-  robot.respond /(top|bottom) (\d+)/i, id: 'plusplus.top-bottom', (msg) ->
+  robot.respond /(top|bottom) (\d+)/i, listenerMetadata.topBottom, (msg) ->
     amount = parseInt(msg.match[2]) || 10
     message = []
 
